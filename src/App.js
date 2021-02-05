@@ -15,7 +15,6 @@ const Container = styled.div`
 
 function App() {
   const [city, setCity] = useState(null);
-  const [isHidden, setIsHidden] = useState(true);
   const [message, setMessage] = useState("Enter city name ...");
   const [todayIcon, setTodayIcon] = useState(null);
   const [todayTemperature, setTodayTemperature] = useState(null);
@@ -39,11 +38,16 @@ function App() {
     setMessage("Loading ...");
     let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=9c459adaaaef54cbd648c7a55dbc12be`;
 
-    axios.get(url).then(showCurrentTemperature);
+    axios.get(url).then((response) => {
+      showCurrentTemperature(response);
+      let apiUrlTwo = `https://api.openweathermap.org/data/2.5/onecall?lat=${response.data.coord.lat}&lon=${response.data.coord.lon}&exclude=hourly,minutely&units=metric&appid=9c459adaaaef54cbd648c7a55dbc12be`;
+      axios.get(apiUrlTwo).then((res) => {
+        locationTemperature(res);
+      });
+    });
   }
 
   function showCurrentTemperature(res) {
-    setIsHidden(true);
     setMessage(city);
     setTodayIcon(
       `http://openweathermap.org/img/wn/${res.data.weather[0].icon}@2x.png`
@@ -85,7 +89,6 @@ function App() {
   }
 
   function locationTemperature(res) {
-    setIsHidden(false);
     setMessage(res.data.timezone);
     setTodayTemperature(`${Math.round(res.data.current.temp)}°C`);
     setTodayIcon(
@@ -115,61 +118,38 @@ function App() {
     );
   }
 
-  if (isHidden) {
-    return (
-      <>
-        <Container>
-          <Header
-            submit={handleSubmit}
-            updateCity={updateCity}
-            location={handleClick}
-          />
-          <Hero
-            cityName={message}
-            temperature={todayTemperature}
-            windSpeed={windSpeed}
-            description={description}
-            icon={todayIcon}
-            convert={handleConvert}
-          />
-        </Container>
-        <Copyright />
-      </>
-    );
-  } else {
-    return (
-      <>
-        <Container>
-          <Header
-            submit={handleSubmit}
-            updateCity={updateCity}
-            location={handleClick}
-          />
-          <Hero
-            cityName={message}
-            temperature={todayTemperature}
-            windSpeed={windSpeed}
-            description={description}
-            icon={todayIcon}
-            convert={handleConvert}
-          />
-          <Footer
-            temperature1={temperature1}
-            icon1={icon1}
-            temperature2={temperature2}
-            icon2={icon2}
-            temperature3={temperature3}
-            icon3={icon3}
-            temperature4={temperature4}
-            icon4={icon4}
-            temperature5={temperature5}
-            icon5={icon5}
-          />
-        </Container>
-        <Copyright />
-      </>
-    );
-  }
+  return (
+    <>
+      <Container>
+        <Header
+          submit={handleSubmit}
+          updateCity={updateCity}
+          location={handleClick}
+        />
+        <Hero
+          cityName={message}
+          temperature={todayTemperature}
+          windSpeed={windSpeed}
+          description={description}
+          icon={todayIcon}
+          convert={handleConvert}
+        />
+        <Footer
+          temperature1={temperature1}
+          icon1={icon1}
+          temperature2={temperature2}
+          icon2={icon2}
+          temperature3={temperature3}
+          icon3={icon3}
+          temperature4={temperature4}
+          icon4={icon4}
+          temperature5={temperature5}
+          icon5={icon5}
+        />
+      </Container>
+      <Copyright />
+    </>
+  );
 }
 
 export default App;
